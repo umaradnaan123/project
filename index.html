@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3 Months Plan</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #87ceeb; /* Sky blue background */
+      font-family: 'Arial', sans-serif;
+      color: #333;
+      text-align: center;
+    }
+    h1 {
+      margin: 20px 0;
+      color: #003366;
+      text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    }
+    input[type="file"], button, select {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #4caf50;
+      color: white;
+      font-size: 1em;
+    }
+    select {
+      background-color: #2a2a60;
+      color: #ffeb3b;
+    }
+    table {
+      width: 80%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background: rgba(255, 255, 255, 0.9);
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    table th {
+      background-color: #4caf50;
+      color: white;
+    }
+    canvas {
+      margin: 20px auto;
+      width: 80%;
+    }
+    .notification {
+      padding: 10px 20px;
+      background-color: #f0ad4e;
+      color: #fff;
+      border-radius: 5px;
+      margin-top: 20px;
+      display: none;
+      text-align: center;
+    }
+    .sum {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #003366;
+    }
+  </style>
+</head>
+<body>
+  <h1>3 Months Plan</h1>
+  <input type="file" id="excelFile" accept=".xls,.xlsx">
+  <button onclick="loadExcel()">Load File</button>
+  <button onclick="saveChanges()">Save</button>
+  <button onclick="deleteExcel()">Delete</button>
+  <div id="dataControls" style="display: none;">
+    <label for="labelSelector">Select Gear Box:</label>
+    <select id="labelSelector"></select>
+    <label for="dataSelector">Weekly Production:</label>
+    <select id="dataSelector"></select>
+    <label for="chartTypeSelector">Select Chart Type:</label>
+    <select id="chartTypeSelector">
+      <option value="bar">Bar Chart</option>
+      <option value="line">Line Chart</option>
+      <option value="pie">Pie Chart</option>
+      <option value="doughnut">Doughnut Chart</option>
+    </select>
+    <button onclick="updateChart()">Update Visualization</button>
+  </div>
+  <table id="dataTable" style="display: none;">
+    <thead>
+      <tr id="tableHeader"></tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <canvas id="dataChart" style="display: none;"></canvas>
+
+  <!-- Notification -->
+  <div id="notification" class="notification"></div>
+  <div id="sumDisplay" class="sum">Total Weekly Production: 0</div> <!-- For displaying the sum of weekly production -->
+
+  <!-- Include SheetJS and Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    let workbookData = []; // Stores parsed Excel data
+    let chartInstance; // Holds the Chart.js instance
+
+    function loadExcel() {
+      const fileInput = document.getElementById('excelFile');
+      if (!fileInput.files.length) {
+        alert('Please select an Excel file to load!');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function (event) {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+
+        const firstSheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[firstSheetName];
+        workbookData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+        if (workbookData.length === 0) {
+          alert('The uploaded Excel file is empty!');
+          return;
+        }
+
+        displayTable();
+        populateSelectors();
+        document.getElementById('dataControls').style.display = 'block';
+        document.getElementById('dataChart').style.display = 'block';
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    function displayTable() {
+      const tableHeader = document.getElementById('tableHeader');
+      const tableBody = document.getElementById('tableBody');
+      tableHeader.innerHTML = '';
+      tableBody.innerHTML = '';
+
+      // Render table headers
+      workbookData[0].forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header || 'Column';
+        tableHeader.appendChild(th);
+      });
+
+      // Render table rows and make cells editable
+      workbookData.slice(1).forEach((row, rowIndex) => {
+        const tr = document.createElement('tr');
+        row.forEach((cell, cellIndex) => {
+          const td = document.createElement('td');
+          td.textContent = cell || '';
+          td.contentEditable = true; // Make the cell editable
+          td.addEventListener('blur', () => {
+            workbookData[rowIndex + 1][cellIndex] = td.textContent; // Update the data in memory
+            updateTotalSum(); // Update the total sum whenever a change occurs
+          });
+          tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+      });
+
+      document.getElementById('dataTable').style.display = 'table';
+      updateTotalSum(); // Calculate and display sum when the table is first loaded
+    }
+
+    function updateTotalSum() {
+      const dataIndex = parseInt(document.getElementById('dataSelector').value, 10); // Get selected weekly production column index
+      const data = workbookData.slice(1).map(row => parseFloat(row[dataIndex]) || 0); // Parse the values as floats
+      const totalSum = data.reduce((acc, value) => acc + value, 0); // Calculate the total sum
+      document.getElementById('sumDisplay').textContent = `Total Weekly Production: ${totalSum.toFixed(2)}`;
+    }
+
+    function populateSelectors() {
+      const labelSelector = document.getElementById('labelSelector');
+      const dataSelector = document.getElementById('dataSelector');
+
+      labelSelector.innerHTML = '';
+      dataSelector.innerHTML = '';
+
+      // Populate dropdowns with all column headers
+      workbookData[0].forEach((header, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = header || `Column ${index + 1}`;
+        labelSelector.appendChild(option);
+        dataSelector.appendChild(option.cloneNode(true));
+      });
+    }
+
+    function saveChanges() {
+      // Convert workbookData back to an Excel file
+      const ws = XLSX.utils.aoa_to_sheet(workbookData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+      // Generate a file download
+      XLSX.writeFile(wb, 'modified_data.xlsx');
+
+      const notification = document.getElementById('notification');
+      notification.textContent = 'Changes saved successfully!';
+      notification.style.display = 'block';
+      setTimeout(() => notification.style.display = 'none', 3000);
+    }
+
+    function deleteExcel() {
+      const confirmDelete = confirm('Are you sure you want to delete the data?');
+      if (confirmDelete) {
+        // Clear the data
+        workbookData = [];
+        document.getElementById('dataTable').style.display = 'none';
+        document.getElementById('dataChart').style.display = 'none';
+        document.getElementById('notification').style.display = 'none';
+        document.getElementById('sumDisplay').textContent = 'Total Weekly Production: 0';
+      }
+    }
+
+    function updateChart() {
+      const labelIndex = parseInt(document.getElementById('labelSelector').value, 10);
+      const dataIndex = parseInt(document.getElementById('dataSelector').value, 10);
+      const chartType = document.getElementById('chartTypeSelector').value;
+
+      const labels = workbookData.slice(1).map(row => row[labelIndex]);
+      const data = workbookData.slice(1).map(row => parseFloat(row[dataIndex]) || 0);
+
+      if (chartInstance) chartInstance.destroy();
+
+      const ctx = document.getElementById('dataChart').getContext('2d');
+      chartInstance = new Chart(ctx, {
+        type: chartType,
+        data: {
+          labels: labels,
+          datasets: [{
+            label: workbookData[0][dataIndex],
+            data: data,
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.6)',
+              'rgba(54, 162, 235, 0.6)',
+              'rgba(255, 206, 86, 0.6)',
+              'rgba(75, 192, 192, 0.6)',
+              'rgba(153, 102, 255, 0.6)',
+              'rgba(255, 159, 64, 0.6)'
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: true,
+              labels: {
+                color: '#333'
+              }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
