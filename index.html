@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://kit.fontawesome.com/8359ac44a8.js" crossorigin="anonymous"></script>
   <title>3 Months Plan</title>
   <style>
     body {
@@ -65,14 +66,17 @@
       font-size: 1.2em;
       color: #003366;
     }
+  
+
   </style>
 </head>
 <body>
   <h1>3 Months Plan</h1>
-  <input type="file" id="excelFile" accept=".xls,.xlsx">
-  <button onclick="loadExcel()">Load File</button>
-  <button onclick="saveChanges()">Save</button>
-  <button onclick="deleteExcel()">Delete</button>
+  <button><i class="fa-solid fa-file-arrow-down"><a href="C:\Users\adnaa\Downloads\Template_Ashok_Leyland_GB_Production.xlsx">&nbsp;&nbsp;Download Template</a></i></button>&nbsp;<i class="fa-solid fa-upload">&nbsp;
+  <input type="file" id="excelFile" accept=".xls,.xlsx"></i>
+  <button onclick="loadExcel()"><i class="fa-solid fa-file-import">&nbsp;Load File</i></button>
+  <button onclick="saveChanges()"><i class="fa-solid fa-download">&nbsp;Save</i></button>
+  <button onclick="deleteExcel()"><i class="fa-solid fa-trash">&nbsp;Delete</i></button>
   <div id="dataControls" style="display: none;">
     <label for="labelSelector">Select Gear Box:</label>
     <select id="labelSelector"></select>
@@ -85,7 +89,7 @@
       <option value="pie">Pie Chart</option>
       <option value="doughnut">Doughnut Chart</option>
     </select>
-    <button onclick="updateChart()">Update Visualization</button>
+    <button onclick="updateChart()"><i class="fa-solid fa-chart-pie">&nbsp;Visualization</i></button>
   </div>
   <table id="dataTable" style="display: none;">
     <thead>
@@ -144,14 +148,14 @@
       tableHeader.innerHTML = '';
       tableBody.innerHTML = '';
 
-      // Render table headers
+      
       workbookData[0].forEach(header => {
         const th = document.createElement('th');
         th.textContent = header || 'Column';
         tableHeader.appendChild(th);
       });
 
-      // Render table rows and make cells editable
+      
       workbookData.slice(1).forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
         row.forEach((cell, cellIndex) => {
@@ -185,7 +189,7 @@
       labelSelector.innerHTML = '';
       dataSelector.innerHTML = '';
 
-      // Populate dropdowns with all column headers
+      
       workbookData[0].forEach((header, index) => {
         const option = document.createElement('option');
         option.value = index;
@@ -196,14 +200,11 @@
     }
 
     function saveChanges() {
-      // Convert workbookData back to an Excel file
+      
       const ws = XLSX.utils.aoa_to_sheet(workbookData);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-
-      // Generate a file download
       XLSX.writeFile(wb, 'modified_data.xlsx');
-
       const notification = document.getElementById('notification');
       notification.textContent = 'Changes saved successfully!';
       notification.style.display = 'block';
@@ -213,7 +214,6 @@
     function deleteExcel() {
       const confirmDelete = confirm('Are you sure you want to delete the data?');
       if (confirmDelete) {
-        // Clear the data
         workbookData = [];
         document.getElementById('dataTable').style.display = 'none';
         document.getElementById('dataChart').style.display = 'none';
@@ -275,3 +275,4 @@
   </script>
 </body>
 </html>
+        
