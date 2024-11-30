@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://kit.fontawesome.com/8359ac44a8.js" crossorigin="anonymous"></script>
-  <title>3 Months Plan</title>
+  <title>3 months plan</title>
   <style>
     body {
       margin: 0;
@@ -66,22 +66,34 @@
       font-size: 1.2em;
       color: #003366;
     }
-  
-
   </style>
 </head>
 <body>
-  <h1>3 Months Plan</h1>
-  <button><i class="fa-solid fa-file-arrow-down"><a href="https://docs.google.com/spreadsheets/d/1aEbp6nvVqqKbS4zdQPfAcQDGg7eWjT9M/edit?usp=sharing&ouid=103474828493204292963&rtpof=true&sd=true">&nbsp;View&Download Template</a></i></button>&nbsp;<i class="fa-solid fa-upload">&nbsp;
-  <input type="file" id="excelFile" accept=".xls,.xlsx"></i>
-  <button onclick="loadExcel()"><i class="fa-solid fa-file-import">&nbsp;Load File</i></button>
-  <button onclick="saveChanges()"><i class="fa-solid fa-download">&nbsp;Save</i></button>
-  <button onclick="deleteExcel()"><i class="fa-solid fa-trash">&nbsp;Delete</i></button>
+  <h1>3 months plan</h1>
+  <button>
+    <i class="fa-solid fa-file-arrow-down">
+      <a href="https://docs.google.com/spreadsheets/d/1aEbp6nvVqqKbS4zdQPfAcQDGg7eWjT9M/edit?usp=sharing&ouid=103474828493204292963&rtpof=true&sd=true">
+        &nbsp;&nbsp;View & Download Template
+      </a>
+    </i>
+  </button>
+  &nbsp;
+  <i class="fa-solid fa-upload">&nbsp;
+    <input type="file" id="excelFile" accept=".xls,.xlsx"></i>
+  <button onclick="loadExcel()">
+    <i class="fa-solid fa-file-import">&nbsp;Load File</i>
+  </button>
+  <button onclick="saveChanges()">
+    <i class="fa-solid fa-download">&nbsp;Save</i>
+  </button>
+  <button onclick="deleteExcel()">
+    <i class="fa-solid fa-trash">&nbsp;Delete</i>
+  </button>
   <div id="dataControls" style="display: none;">
     <label for="labelSelector">Select Gear Box:</label>
     <select id="labelSelector"></select>
     <label for="dataSelector">Weekly Production:</label>
-    <select id="dataSelector"></select>
+    <select id="dataSelector" onchange="updateTotalSum()"></select>
     <label for="chartTypeSelector">Select Chart Type:</label>
     <select id="chartTypeSelector">
       <option value="bar">Bar Chart</option>
@@ -89,7 +101,9 @@
       <option value="pie">Pie Chart</option>
       <option value="doughnut">Doughnut Chart</option>
     </select>
-    <button onclick="updateChart()"><i class="fa-solid fa-chart-pie">&nbsp;Visualization</i></button>
+    <button onclick="updateChart()">
+      <i class="fa-solid fa-chart-pie">&nbsp;Visualization</i>
+    </button>
   </div>
   <table id="dataTable" style="display: none;">
     <thead>
@@ -101,7 +115,7 @@
 
   <!-- Notification -->
   <div id="notification" class="notification"></div>
-  <div id="sumDisplay" class="sum">Total Weekly Production: 0</div> <!-- For displaying the sum of weekly production -->
+  <div id="sumDisplay" class="sum">Total Weekly Production: 0</div>
 
   <!-- Include SheetJS and Chart.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -148,23 +162,21 @@
       tableHeader.innerHTML = '';
       tableBody.innerHTML = '';
 
-      
       workbookData[0].forEach(header => {
         const th = document.createElement('th');
         th.textContent = header || 'Column';
         tableHeader.appendChild(th);
       });
 
-      
       workbookData.slice(1).forEach((row, rowIndex) => {
         const tr = document.createElement('tr');
         row.forEach((cell, cellIndex) => {
           const td = document.createElement('td');
           td.textContent = cell || '';
-          td.contentEditable = true; // Make the cell editable
+          td.contentEditable = true;
           td.addEventListener('blur', () => {
-            workbookData[rowIndex + 1][cellIndex] = td.textContent; // Update the data in memory
-            updateTotalSum(); // Update the total sum whenever a change occurs
+            workbookData[rowIndex + 1][cellIndex] = td.textContent; // Update data in memory
+            updateTotalSum(); // Update total dynamically
           });
           tr.appendChild(td);
         });
@@ -172,13 +184,15 @@
       });
 
       document.getElementById('dataTable').style.display = 'table';
-      updateTotalSum(); // Calculate and display sum when the table is first loaded
+      updateTotalSum();
     }
 
     function updateTotalSum() {
-      const dataIndex = parseInt(document.getElementById('dataSelector').value, 10); // Get selected weekly production column index
-      const data = workbookData.slice(1).map(row => parseFloat(row[dataIndex]) || 0); // Parse the values as floats
-      const totalSum = data.reduce((acc, value) => acc + value, 0); // Calculate the total sum
+      const dataSelector = document.getElementById('dataSelector');
+      if (!dataSelector.value) return; // Skip if no column selected
+      const dataIndex = parseInt(dataSelector.value, 10);
+      const data = workbookData.slice(1).map(row => parseFloat(row[dataIndex]) || 0);
+      const totalSum = data.reduce((acc, value) => acc + value, 0);
       document.getElementById('sumDisplay').textContent = `Total Weekly Production: ${totalSum.toFixed(2)}`;
     }
 
@@ -189,7 +203,6 @@
       labelSelector.innerHTML = '';
       dataSelector.innerHTML = '';
 
-      
       workbookData[0].forEach((header, index) => {
         const option = document.createElement('option');
         option.value = index;
@@ -200,7 +213,6 @@
     }
 
     function saveChanges() {
-      
       const ws = XLSX.utils.aoa_to_sheet(workbookData);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
@@ -227,46 +239,30 @@
       const dataIndex = parseInt(document.getElementById('dataSelector').value, 10);
       const chartType = document.getElementById('chartTypeSelector').value;
 
-      const labels = workbookData.slice(1).map(row => row[labelIndex]);
+      const labels = workbookData.slice(1).map(row => row[labelIndex] || 'Unknown');
       const data = workbookData.slice(1).map(row => parseFloat(row[dataIndex]) || 0);
+
+      const ctx = document.getElementById('dataChart').getContext('2d');
 
       if (chartInstance) chartInstance.destroy();
 
-      const ctx = document.getElementById('dataChart').getContext('2d');
       chartInstance = new Chart(ctx, {
         type: chartType,
         data: {
-          labels: labels,
+          labels,
           datasets: [{
-            label: workbookData[0][dataIndex],
-            data: data,
-            backgroundColor: [
-              'rgba(255, 99, 132, 0.6)',
-              'rgba(54, 162, 235, 0.6)',
-              'rgba(255, 206, 86, 0.6)',
-              'rgba(75, 192, 192, 0.6)',
-              'rgba(153, 102, 255, 0.6)',
-              'rgba(255, 159, 64, 0.6)'
-            ],
-            borderColor: [
-              'rgba(255, 99, 132, 1)',
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 206, 86, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)'
-            ],
+            label: 'Weekly Production',
+            data,
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
             borderWidth: 1
           }]
         },
         options: {
           responsive: true,
-          plugins: {
-            legend: {
-              display: true,
-              labels: {
-                color: '#333'
-              }
+          scales: {
+            y: {
+              beginAtZero: true
             }
           }
         }
@@ -275,4 +271,3 @@
   </script>
 </body>
 </html>
-        
