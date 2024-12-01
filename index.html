@@ -9,7 +9,7 @@
     body {
       margin: 0;
       padding: 0;
-      background-color: #b768a2; /* Sky blue background */
+      background-color: #b768a2; 
       font-family: 'Arial', sans-serif;
       color: #333;
       text-align: center;
@@ -113,16 +113,16 @@
   </table>
   <canvas id="dataChart" style="display: none;"></canvas>
 
-  <!-- Notification -->
+
   <div id="notification" class="notification"></div>
   <div id="sumDisplay" class="sum">Total Weekly Production: 0</div>
 
-  <!-- Include SheetJS and Chart.js -->
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    let workbookData = []; // Stores parsed Excel data
-    let chartInstance; // Holds the Chart.js instance
+    let workbookData = []; 
+    let chartInstance; 
 
     function loadExcel() {
       const fileInput = document.getElementById('excelFile');
@@ -175,8 +175,8 @@
           td.textContent = cell || '';
           td.contentEditable = true;
           td.addEventListener('blur', () => {
-            workbookData[rowIndex + 1][cellIndex] = td.textContent; // Update data in memory
-            updateTotalSum(); // Update total dynamically
+            workbookData[rowIndex + 1][cellIndex] = td.textContent; 
+            updateTotalSum(); 
           });
           tr.appendChild(td);
         });
@@ -189,7 +189,7 @@
 
     function updateTotalSum() {
       const dataSelector = document.getElementById('dataSelector');
-      if (!dataSelector.value) return; // Skip if no column selected
+      if (!dataSelector.value) return; 
       const dataIndex = parseInt(dataSelector.value, 10);
       const data = workbookData.slice(1).map(row => parseFloat(row[dataIndex]) || 0);
       const totalSum = data.reduce((acc, value) => acc + value, 0);
