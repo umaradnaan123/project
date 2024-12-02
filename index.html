@@ -4,12 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://kit.fontawesome.com/8359ac44a8.js" crossorigin="anonymous"></script>
-  <title>3 months plan</title>
+  <title>Day wise GB production</title>
   <style>
     body {
       margin: 0;
       padding: 0;
-      background-color: #b768a2; 
+      background-color: #ffa500;/* Sky blue background */
+      background-image: url("paper.gif");
       font-family: 'Arial', sans-serif;
       color: #333;
       text-align: center;
@@ -66,17 +67,51 @@
       font-size: 1.2em;
       color: #003366;
     }
+     .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: green;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+    }
+    .dropdown-content a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+    }
+    .dropdown-content a:hover {
+      background-color: #f1f1f1;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    .dropdown:hover .dropbtn {
+      background-color: #3e8e41;
+    }
   </style>
 </head>
 <body>
-  <h1>3 months plan</h1>
-  <button>
-    <i class="fa-solid fa-file-arrow-down">
-      <a href="https://docs.google.com/spreadsheets/d/1aEbp6nvVqqKbS4zdQPfAcQDGg7eWjT9M/edit?usp=sharing&ouid=103474828493204292963&rtpof=true&sd=true">
-        &nbsp;&nbsp;View & Download Template
-      </a>
-    </i>
-  </button>
+  
+  <h1>Day wise GB production</h1>
+  <div class="dropdown">
+    <button class="dropbtn">
+      <i class="fa-solid fa-file-arrow-down"></i>&nbsp;&nbsp;View & Download Template
+    </button>
+    <div class="dropdown-content">
+      <a href="https://docs.google.com/spreadsheets/d/1cyebqnINLvVPlHFaeKayz37457KJ-rdX/edit?usp=drivesdk&ouid=110677489003232534140&rtpof=true&sd=true">3_Months_Plan</a>
+      <a href="https://docs.google.com/spreadsheets/d/1czcwcBWOQ8CiEb48erylGmQdn0jV_3xT/edit?usp=drivesdk&ouid=110677489003232534140&rtpof=true&sd=true">Monthly_Opening_Stock(OS)</a>
+      <a href="https://docs.google.com/spreadsheets/d/1d-QY6UeoKGFDGpOpaDA7dtYN_3VjnwN5/edit?usp=drivesdk&ouid=110677489003232534140&rtpof=true&sd=true">Day_Wise_Gear_Box_Production</a>
+      <a href="https://docs.google.com/spreadsheets/d/1dA178-d_J5jQJOEcF-GE74OP2EIx776-/edit?usp=drivesdk&ouid=110677489003232534140&rtpof=true&sd=true">Today's_Tentative_Plan</a>
+      <a href="https://docs.google.com/spreadsheets/d/1dD00BwxVL5b8NCRO4a2cAw86baxlVI3v/edit?usp=drivesdk&ouid=110677489003232534140&rtpof=true&sd=true">Part_Matrix</a>
+      <a href="https://docs.google.com/spreadsheets/d/1dEIS1gEDKgO-IaIaJLXH7P5NA9OryVMV/edit?usp=drivesdk&ouid=110677489003232534140&rtpof=true&sd=true">Day_Wise_Made_Here</a>
+    </div>
+  </div>
   &nbsp;
   <i class="fa-solid fa-upload">&nbsp;
     <input type="file" id="excelFile" accept=".xls,.xlsx"></i>
@@ -113,16 +148,16 @@
   </table>
   <canvas id="dataChart" style="display: none;"></canvas>
 
-
+  <!-- Notification -->
   <div id="notification" class="notification"></div>
   <div id="sumDisplay" class="sum">Total Weekly Production: 0</div>
 
-  
+  <!-- Include SheetJS and Chart.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    let workbookData = []; 
-    let chartInstance; 
+    let workbookData = []; // Stores parsed Excel data
+    let chartInstance; // Holds the Chart.js instance
 
     function loadExcel() {
       const fileInput = document.getElementById('excelFile');
@@ -175,8 +210,8 @@
           td.textContent = cell || '';
           td.contentEditable = true;
           td.addEventListener('blur', () => {
-            workbookData[rowIndex + 1][cellIndex] = td.textContent; 
-            updateTotalSum(); 
+            workbookData[rowIndex + 1][cellIndex] = td.textContent; // Update data in memory
+            updateTotalSum(); // Update total dynamically
           });
           tr.appendChild(td);
         });
@@ -189,7 +224,7 @@
 
     function updateTotalSum() {
       const dataSelector = document.getElementById('dataSelector');
-      if (!dataSelector.value) return; 
+      if (!dataSelector.value) return; // Skip if no column selected
       const dataIndex = parseInt(dataSelector.value, 10);
       const data = workbookData.slice(1).map(row => parseFloat(row[dataIndex]) || 0);
       const totalSum = data.reduce((acc, value) => acc + value, 0);
